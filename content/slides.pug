@@ -10,10 +10,12 @@ mixin foot-note(number)
 
 section
   h3 ANSI, Schmansi!
-  p How I learned to stop worrying <br>and love Postgres-isms
+  h4 How I learned to stop worrying <br>and love Postgres-isms
   br
-  p PostgresConf US 2018
-  p.small April 19, 2018<br>Jersey City, NJ
+  p: strong Sehrope Sarkuni
+  p: strong JackDB
+  p PostgresOpen SV 2018
+  p.small September 7, 2018
 
 section
   h3 About Me
@@ -332,12 +334,30 @@ section
     CREATE UNIQUE INDEX foo_ix_lower_name
       ON foo (LOWER(name));
   pre.code.nohighlight.
-    => EXPLAIN SELECT * FROM foo WHERE LOWER(name) = 'abc';
-                                      QUERY PLAN           
+    => EXPLAIN SELECT *
+       FROM foo
+       WHERE LOWER(name) = 'abc';
+                       QUERY PLAN
     -------------------------------------------------------
     Index Scan using foo_ix_lower_name on foo
       (cost=0.43..8.45 rows=1 width=18)
       Index Cond: (lower(name) = 'abc'::text)
+
+section
+  h3 Functional Indexes
+  p That includes JSON operators
+  pre: code.sql.
+    CREATE UNIQUE INDEX foo_ix_data_name
+      ON foo ((data->>'name'));
+  pre.code.nohighlight.
+    => EXPLAIN SELECT *
+       FROM foo
+       WHERE (foo.data->>'name') = 'Alice';
+                                    QUERY PLAN
+    -----------------------------------------------------------------------------
+    Index Scan using foo_ix_data_name on foo  (cost=0.29..8.31 rows=1 width=11)
+      Index Cond: ((data ->> 'name'::text) = 'Alice'::text)
+    (2 rows)
 
 section
   h3 Schema and Data migrations

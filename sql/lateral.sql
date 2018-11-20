@@ -6,7 +6,7 @@ SELECT
   p.total_price
 FROM customer c
   LEFT JOIN LATERAL (
-    SELECT
+    SELECT p.*
     FROM purchase p
     -- Filter on this specific customer's purchases:
     WHERE p.customer_id = c.id

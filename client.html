@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PostgresConf US 2018 - ANSI, Schmansi!</title>
+    <title>PostgresOpen SV 2018 - ANSI, Schmansi!</title>
     <link rel="stylesheet" href="css/reveal.css">
     <link rel="stylesheet" href="css/theme/blood.css">
     <link rel="stylesheet" href="lib/css/zenburn.css">
@@ -51,9 +51,11 @@
       <div class="slides">
         <section>
           <h3>ANSI, Schmansi!</h3>
-          <p>How I learned to stop worrying <br>and love Postgres-isms</p><br>
-          <p>PostgresConf US 2018</p>
-          <p class="small">April 19, 2018<br>Jersey City, NJ</p>
+          <h4>How I learned to stop worrying <br>and love Postgres-isms</h4><br>
+          <p><strong>Sehrope Sarkuni</strong></p>
+          <p><strong>JackDB</strong></p>
+          <p>PostgresOpen SV 2018</p>
+          <p class="small">September 7, 2018</p>
         </section>
         <section>
           <h3>About Me</h3>
@@ -284,7 +286,7 @@ SELECT
   p.total_price
 FROM customer c
   LEFT JOIN LATERAL (
-    SELECT
+    SELECT p.*
     FROM purchase p
     -- Filter on this specific customer's purchases:
     WHERE p.customer_id = c.id
@@ -516,12 +518,29 @@ CREATE UNIQUE INDEX menu_item_uk_menu_date_is_daily_special
           <p>Allows for indexing an expression</p>
           <pre><code class="sql">CREATE UNIQUE INDEX foo_ix_lower_name
   ON foo (LOWER(name));</code></pre>
-          <pre class="code nohighlight">=> EXPLAIN SELECT * FROM foo WHERE LOWER(name) = 'abc';
-                                  QUERY PLAN           
+          <pre class="code nohighlight">=> EXPLAIN SELECT *
+   FROM foo
+   WHERE LOWER(name) = 'abc';
+                   QUERY PLAN
 -------------------------------------------------------
 Index Scan using foo_ix_lower_name on foo
   (cost=0.43..8.45 rows=1 width=18)
   Index Cond: (lower(name) = 'abc'::text)
+</pre>
+        </section>
+        <section>
+          <h3>Functional Indexes</h3>
+          <p>That includes JSON operators</p>
+          <pre><code class="sql">CREATE UNIQUE INDEX foo_ix_data_name
+  ON foo ((data->>'name'));</code></pre>
+          <pre class="code nohighlight">=> EXPLAIN SELECT *
+   FROM foo
+   WHERE (foo.data->>'name') = 'Alice';
+                                QUERY PLAN
+-----------------------------------------------------------------------------
+Index Scan using foo_ix_data_name on foo  (cost=0.29..8.31 rows=1 width=11)
+  Index Cond: ((data ->> 'name'::text) = 'Alice'::text)
+(2 rows)
 </pre>
         </section>
         <section>
